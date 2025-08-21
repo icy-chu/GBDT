@@ -57,7 +57,7 @@
                 }
             }
 
-            fetch('http://127.0.0.1:5001/predict', {
+            fetch('https://gbdt.onrender.com/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -81,3 +81,4 @@
     </script>
 </body>
 </html>
+
