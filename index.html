@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>the GBDT model</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        input { margin: 5px; padding: 5px; width: 100px; }
+        button { margin: 10px; padding: 8px 15px; }
+        .red { color: red; font-weight: bold; }
+        .green { color: green; font-weight: bold; }
+        .orange { color: orange; font-weight: bold; }
+        .error { color: darkred; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>the GBDT model</h2>
+    <form id="input-form">
+        <label>AST: <input type="number" step="any" name="AST" required>U/L</label><br>
+        <label>GGT: <input type="number" step="any" name="GGT" required>U/L</label><br>
+        <label>AFP: <input type="number" step="any" name="AFP" required>ug/L</label><br>
+        <label>AGR: <input type="number" step="any" name="AGR" required></label><br>
+        <button type="button" onclick="submitForm()">Predict</button>
+        <button type="button" onclick="resetForm()">Reset</button>
+    </form>
+
+    <h2>Prediction Result:</h2>
+    <div id="result"></div>
+
+    <div class="note">
+        <p> <0.415, patients with chronic hepatitis B have a liver inflammation level G<2 (low risk of G≥2); </p>
+        <p> >0.510, patients with chronic hepatitis B have a high risk of inflammation level G≥2.</p>
+        <p></p>
+        <p> AST: aspartate aminotransferase; GGT: glutamyl transpeptase; </p>
+        <p> AFP:alpha-fetoprotein; AGR:albumin-globulin ratio;</p>
+    </div>
+
+    <script>
+        function submitForm() {
+            const form = document.getElementById('input-form');
+            const elements = form.elements;
+            const formData = {};
+
+            for (let i = 0; i < elements.length; i++) {
+                const field = elements[i];
+                if (field.name) {
+                    if (field.value === '') {
+                        alert('Please ensure that you have filled in all the required fields in the input data.');
+                        return;
+                    }
+                    const value = parseFloat(field.value);
+                    if (isNaN(value) || value < 0) {
+                        alert('The value entered must be a valid number greater than or equal to 0');
+                        return;
+                    }
+                    formData[field.name] = value;
+                }
+            }
+
+            fetch('http://127.0.0.1:5001/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('result').innerText = `Error: ${data.error}`;
+                } else {
+                    let color = data.grade === "High risk" ? "red" : data.grade === "Low risk" ? "green" : "orange";
+                    document.getElementById('result').innerHTML = `<span style="color:${color}; font-weight:bold;">Risk: ${data.grade}</span><br>Raw score: ${data.score.toFixed(4)}`;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function resetForm() {
+            document.getElementById('input-form').reset();
+            document.getElementById('result').innerText = '';
+        }
+    </script>
+</body>
+</html>
