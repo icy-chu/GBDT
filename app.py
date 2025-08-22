@@ -6,7 +6,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 # 加载模型
-model = joblib.load("gbdt_model.pkl")
+model = joblib.load("rf_model.pkl")
 
 # 模型特征顺序
 top_features = ['AST', 'GGT', 'AFP', 'AGR']
@@ -46,3 +46,4 @@ def index():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))  # 默认端口为 5001
     app.run(host='0.0.0.0', port=port, debug=True)
+
